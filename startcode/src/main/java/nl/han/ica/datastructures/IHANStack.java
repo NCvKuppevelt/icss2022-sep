@@ -2,11 +2,11 @@ package nl.han.ica.datastructures;
 
 public interface IHANStack<T> {
     /**
-     * pushes value T to the top of the stack
+     * Adds value T to the top of the stack
      *
-     * @param value value to push
+     * @param value value to add
      */
-    void push(T value);
+    void add(T value);
 
     /**
      * Pops (and removes) value at top of stack

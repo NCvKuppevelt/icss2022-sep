@@ -1,5 +1,7 @@
 package nl.han.ica.icss.parser;
 
+import nl.han.ica.datastructures.HANStack;
+import nl.han.ica.datastructures.IHANStack;
 import nl.han.ica.icss.ast.*;
 import nl.han.ica.icss.ast.literals.ColorLiteral;
 import nl.han.ica.icss.ast.literals.PercentageLiteral;
@@ -8,24 +10,20 @@ import nl.han.ica.icss.ast.selectors.ClassSelector;
 import nl.han.ica.icss.ast.selectors.IdSelector;
 import nl.han.ica.icss.ast.selectors.TagSelector;
 
-import java.util.Stack;
-
 /**
  * This class extracts the ICSS Abstract Syntax Tree from the Antlr Parse tree.
  */
 public class ASTListener extends ICSSBaseListener {
 
     //Accumulator attributes:
-    private AST ast;
+    private final AST ast;
 
     //Use this to keep track of the parent nodes when recursively traversing the ast
-//    private IHANStack<ASTNode> currentContainer;
-    private Stack<ASTNode> currentContainer; //later te vervangen
+    private final IHANStack<ASTNode> currentContainer;
 
     public ASTListener() {
         ast = new AST();
-        //currentContainer = new HANStack<>();
-        currentContainer = new Stack<>();
+        currentContainer = new HANStack<>();
     }
 
     public AST getAST() {
