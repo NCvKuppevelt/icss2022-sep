@@ -47,8 +47,10 @@ ASSIGNMENT_OPERATOR: ':=';
 //--- PARSER: ---
 stylesheet: stylerule*;
 
-stylerule: selector OPEN_BRACE declaration+ CLOSE_BRACE;
-selector: LOWER_IDENT | ID_IDENT | CLASS_IDENT;
-declaration: property COLON value SEMICOLON;
-property: LOWER_IDENT;
-value: COLOR | PIXELSIZE | PERCENTAGE;
+stylerule: (tagSelector|idSelector|classSelector) OPEN_BRACE declaration+ CLOSE_BRACE;
+tagSelector: LOWER_IDENT;
+idSelector: ID_IDENT;
+classSelector: CLASS_IDENT;
+declaration: propertyName COLON expression SEMICOLON;
+propertyName: LOWER_IDENT;
+expression: COLOR #colorLiteral | PIXELSIZE #pixelLiteral | PERCENTAGE #percentageLiteral;
