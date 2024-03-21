@@ -146,6 +146,6 @@ public class ASTListener extends ICSSBaseListener {
     @Override
     public void exitPercentageLiteral(ICSSParser.PercentageLiteralContext ctx) {
         PercentageLiteral percentageLiteral = (PercentageLiteral) currentContainer.pop();
-        currentContainer.add(percentageLiteral);
+        currentContainer.peek().addChild(percentageLiteral);
     }
 }
