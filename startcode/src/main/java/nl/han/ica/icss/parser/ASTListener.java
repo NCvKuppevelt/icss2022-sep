@@ -3,6 +3,7 @@ package nl.han.ica.icss.parser;
 import nl.han.ica.datastructures.HANStack;
 import nl.han.ica.datastructures.IHANStack;
 import nl.han.ica.icss.ast.*;
+import nl.han.ica.icss.ast.literals.BoolLiteral;
 import nl.han.ica.icss.ast.literals.ColorLiteral;
 import nl.han.ica.icss.ast.literals.PercentageLiteral;
 import nl.han.ica.icss.ast.literals.PixelLiteral;
@@ -43,14 +44,14 @@ public class ASTListener extends ICSSBaseListener {
 
     @Override
     public void enterStylerule(ICSSParser.StyleruleContext ctx) {
-        Stylerule rule = new Stylerule();
-        currentContainer.add(rule);
+        Stylerule stylerule = new Stylerule();
+        currentContainer.add(stylerule);
     }
 
     @Override
     public void exitStylerule(ICSSParser.StyleruleContext ctx) {
-        Stylerule rule = (Stylerule) currentContainer.pop();
-        currentContainer.peek().addChild(rule);
+        Stylerule stylerule = (Stylerule) currentContainer.pop();
+        currentContainer.peek().addChild(stylerule);
     }
 
     @Override
@@ -147,5 +148,41 @@ public class ASTListener extends ICSSBaseListener {
     public void exitPercentageLiteral(ICSSParser.PercentageLiteralContext ctx) {
         PercentageLiteral percentageLiteral = (PercentageLiteral) currentContainer.pop();
         currentContainer.peek().addChild(percentageLiteral);
+    }
+
+    @Override
+    public void enterBoolLiteral(ICSSParser.BoolLiteralContext ctx) {
+        BoolLiteral boolLiteral = new BoolLiteral(ctx.getText());
+        currentContainer.add(boolLiteral);
+    }
+
+    @Override
+    public void exitBoolLiteral(ICSSParser.BoolLiteralContext ctx) {
+        BoolLiteral boolLiteral = (BoolLiteral) currentContainer.pop();
+        currentContainer.peek().addChild(boolLiteral);
+    }
+
+    @Override
+    public void enterVariableAssignment(ICSSParser.VariableAssignmentContext ctx) {
+        VariableAssignment variableAssignment = new VariableAssignment();
+        currentContainer.add(variableAssignment);
+    }
+
+    @Override
+    public void exitVariableAssignment(ICSSParser.VariableAssignmentContext ctx) {
+        VariableAssignment variableAssignment = (VariableAssignment) currentContainer.pop();
+        currentContainer.peek().addChild(variableAssignment);
+    }
+
+    @Override
+    public void enterVariableReference(ICSSParser.VariableReferenceContext ctx) {
+        VariableReference variableReference = new VariableReference(ctx.getText());
+        currentContainer.add(variableReference);
+    }
+
+    @Override
+    public void exitVariableReference(ICSSParser.VariableReferenceContext ctx) {
+        VariableReference variableReference = (VariableReference) currentContainer.pop();
+        currentContainer.peek().addChild(variableReference);
     }
 }
