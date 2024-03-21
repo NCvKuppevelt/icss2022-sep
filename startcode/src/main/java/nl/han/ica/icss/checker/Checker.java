@@ -44,7 +44,8 @@ public class Checker {
 
     private void check(Stylesheet sheet) {
         for (ASTNode node : sheet.getChildren()) {
-            check((Stylerule) node);
+            if (node instanceof Stylerule) check((Stylerule) node);
+            else node.setError("Unknown type as child of Stylesheet");
         }
     }
 
@@ -52,7 +53,7 @@ public class Checker {
         for (ASTNode node : rule.getChildren()) {
             if (node instanceof Selector) check((Selector) node);
             else if (node instanceof Declaration) check((Declaration) node);
-            else rule.setError("Stylerule can only have Selector and Declaration children");
+            else node.setError("Unknown type as child of Stylerule");
         }
     }
 
@@ -60,6 +61,7 @@ public class Checker {
         if (selector instanceof TagSelector) check((TagSelector) selector);
         else if (selector instanceof IdSelector) check((IdSelector) selector);
         else if (selector instanceof ClassSelector) check((ClassSelector) selector);
+        else selector.setError("Selector of unknown type");
     }
 
     private void check(TagSelector tagSelector) {
@@ -82,10 +84,11 @@ public class Checker {
                 sizeProperties.contains(propertyName.name) && !(expression instanceof PixelLiteral) ||
                 sizeProperties.contains(propertyName.name) && !(expression instanceof PercentageLiteral)) {
             declaration.setError("Property-Expression mismatch");
+        } else {
+            check(propertyName);
+            check(expression);
         }
 
-        check(propertyName);
-        check(expression);
     }
 
     private void check(PropertyName propertyName) {
@@ -95,6 +98,7 @@ public class Checker {
         if (expression instanceof PixelLiteral) check((PixelLiteral) expression);
         else if (expression instanceof PercentageLiteral) check((PercentageLiteral) expression);
         else if (expression instanceof ColorLiteral) check((ColorLiteral) expression);
+        else expression.setError("Expression of unknown type");
     }
 
     private void check(PixelLiteral pixelLiteral) {
