@@ -53,5 +53,4 @@ public class Evaluator implements Transform {
         return new PixelLiteral(left.value + right.value);
     }
 
-
 }
