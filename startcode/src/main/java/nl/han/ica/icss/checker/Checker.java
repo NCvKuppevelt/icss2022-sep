@@ -56,6 +56,10 @@ public class Checker {
         VariableReference variableReference = (VariableReference) variableAssignment.getChildren().get(0);
         Expression expression = (Expression) variableAssignment.getChildren().get(1);
 
+        if (variableExists(variableReference.name)) {
+            variableAssignment.setError("Variable already exists in this scope");
+        }
+
         ExpressionType expressionType = ExpressionType.UNDEFINED;
         if (expression instanceof PixelLiteral)
             expressionType = ExpressionType.PIXEL;
@@ -74,6 +78,14 @@ public class Checker {
 
         check(variableReference);
         check(expression);
+    }
+
+    private boolean variableExists(String name) {
+        for (HashMap<String, ExpressionType> map : variableTypes) {
+            if (map.containsKey(name))
+                return true;
+        }
+        return false;
     }
 
     private void check(VariableReference variableReference) {
