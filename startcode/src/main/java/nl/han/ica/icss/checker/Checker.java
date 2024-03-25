@@ -44,24 +44,33 @@ public class Checker {
 
     private void check(Stylesheet sheet) {
         for (ASTNode node : sheet.getChildren()) {
-            if (node instanceof Stylerule) check((Stylerule) node);
-            else node.setError("Unknown type as child of Stylesheet");
+            if (node instanceof Stylerule)
+                check((Stylerule) node);
+            else
+                node.setError("Unknown type as child of Stylesheet");
         }
     }
 
     private void check(Stylerule rule) {
         for (ASTNode node : rule.getChildren()) {
-            if (node instanceof Selector) check((Selector) node);
-            else if (node instanceof Declaration) check((Declaration) node);
-            else node.setError("Unknown type as child of Stylerule");
+            if (node instanceof Selector)
+                check((Selector) node);
+            else if (node instanceof Declaration)
+                check((Declaration) node);
+            else
+                node.setError("Unknown type as child of Stylerule");
         }
     }
 
     private void check(Selector selector) {
-        if (selector instanceof TagSelector) check((TagSelector) selector);
-        else if (selector instanceof IdSelector) check((IdSelector) selector);
-        else if (selector instanceof ClassSelector) check((ClassSelector) selector);
-        else selector.setError("Selector of unknown type");
+        if (selector instanceof TagSelector)
+            check((TagSelector) selector);
+        else if (selector instanceof IdSelector)
+            check((IdSelector) selector);
+        else if (selector instanceof ClassSelector)
+            check((ClassSelector) selector);
+        else
+            selector.setError("Selector of unknown type");
     }
 
     private void check(TagSelector tagSelector) {
@@ -95,10 +104,14 @@ public class Checker {
     }
 
     private void check(Expression expression) {
-        if (expression instanceof PixelLiteral) check((PixelLiteral) expression);
-        else if (expression instanceof PercentageLiteral) check((PercentageLiteral) expression);
-        else if (expression instanceof ColorLiteral) check((ColorLiteral) expression);
-        else expression.setError("Expression of unknown type");
+        if (expression instanceof PixelLiteral)
+            check((PixelLiteral) expression);
+        else if (expression instanceof PercentageLiteral)
+            check((PercentageLiteral) expression);
+        else if (expression instanceof ColorLiteral)
+            check((ColorLiteral) expression);
+        else
+            expression.setError("Expression of unknown type");
     }
 
     private void check(PixelLiteral pixelLiteral) {
