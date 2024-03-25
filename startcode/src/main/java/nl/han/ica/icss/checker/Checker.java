@@ -3,6 +3,7 @@ package nl.han.ica.icss.checker;
 import nl.han.ica.datastructures.HANLinkedList;
 import nl.han.ica.datastructures.IHANLinkedList;
 import nl.han.ica.icss.ast.*;
+import nl.han.ica.icss.ast.literals.BoolLiteral;
 import nl.han.ica.icss.ast.literals.ColorLiteral;
 import nl.han.ica.icss.ast.literals.PercentageLiteral;
 import nl.han.ica.icss.ast.literals.PixelLiteral;
@@ -27,13 +28,13 @@ public class Checker {
     }
 
     private void initColorProperties() {
-        colorProperties.add("color");
         colorProperties.add("background-color");
+        colorProperties.add("color");
     }
 
     private void initSizeProperties() {
-        sizeProperties.add("width");
         sizeProperties.add("height");
+        sizeProperties.add("width");
     }
 
     public void check(AST ast) {
@@ -44,11 +45,39 @@ public class Checker {
 
     private void check(Stylesheet sheet) {
         for (ASTNode node : sheet.getChildren()) {
-            if (node instanceof Stylerule)
+            if (node instanceof VariableAssignment)
+                check((VariableAssignment) node);
+            else if (node instanceof Stylerule)
                 check((Stylerule) node);
             else
                 node.setError("Unknown type as child of Stylesheet");
         }
+    }
+
+    private void check(VariableAssignment variableAssignment) {
+        VariableReference variableReference = (VariableReference) variableAssignment.getChildren().get(0);
+        Expression expression = (Expression) variableAssignment.getChildren().get(1);
+
+        ExpressionType expressionType;
+        if (expression instanceof PixelLiteral)
+            expressionType = ExpressionType.PIXEL;
+        else if (expression instanceof PercentageLiteral)
+            expressionType = ExpressionType.PERCENTAGE;
+        else if (expression instanceof ColorLiteral)
+            expressionType = ExpressionType.COLOR;
+        else if (expression instanceof BoolLiteral)
+            expressionType = ExpressionType.BOOL;
+        else
+            variableAssignment.setError("Unable to determine expression type");
+//        variableTypes.addFirst();
+        // TODO: add variable and its type as hashmap to variableTypes
+
+        check(variableReference);
+        check(expression);
+    }
+
+    private void check(VariableReference variableReference) {
+
     }
 
     private void check(Stylerule rule) {
@@ -90,8 +119,7 @@ public class Checker {
         Expression expression = (Expression) declaration.getChildren().get(1);
 
         if ((colorProperties.contains(propertyName.name) && !(expression instanceof ColorLiteral)) ||
-                sizeProperties.contains(propertyName.name) && !(expression instanceof PixelLiteral) ||
-                sizeProperties.contains(propertyName.name) && !(expression instanceof PercentageLiteral)) {
+                sizeProperties.contains(propertyName.name) && !(expression instanceof PixelLiteral || expression instanceof PercentageLiteral)) {
             declaration.setError("Property-Expression mismatch");
         } else {
             check(propertyName);
