@@ -1,35 +1,50 @@
 package nl.han.ica.icss.transforms;
 
-import nl.han.ica.datastructures.IHANLinkedList;
 import nl.han.ica.icss.ast.*;
 import nl.han.ica.icss.ast.literals.PixelLiteral;
 import nl.han.ica.icss.ast.operations.AddOperation;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class Evaluator implements Transform {
 
-    private IHANLinkedList<HashMap<String, Literal>> variableValues;
+    private LinkedList<HashMap<String, Literal>> variableValues;
 
     public Evaluator() {
-        //variableValues = new HANLinkedList<>();
+        variableValues = new LinkedList<>();
     }
 
     @Override
     public void apply(AST ast) {
-        //variableValues = new HANLinkedList<>();
+        variableValues = new LinkedList<>();
         applyStylesheet(ast.root);
     }
 
     private void applyStylesheet(Stylesheet stylesheet) {
-        applyStylerule((Stylerule) stylesheet.getChildren().get(0)); // TODO: loop?
+        variableValues.add(new HashMap<>());
+        for (ASTNode node : stylesheet.getChildren()) {
+            if (node instanceof VariableAssignment) {
+                applyVariableAssignment((VariableAssignment) node);
+            }
+            else if (node instanceof Stylerule) {
+                applyStylerule((Stylerule) node);
+            }
+        }
+        variableValues.removeFirst();
+    }
+
+    private void applyVariableAssignment(VariableAssignment variableAssignment) {
+        VariableReference variableReference = (VariableReference) variableAssignment.getChildren().get(0);
+        Expression expression = (Expression) variableAssignment.getChildren().get(1);
+
+        variableValues.getFirst().put(variableReference.name, (Literal) evaluateExpression(expression));
     }
 
     private void applyStylerule(Stylerule stylerule) {
         for (ASTNode node : stylerule.getChildren()) {
-            if (node instanceof Declaration) {
+            if (node instanceof Declaration)
                 applyDeclaration((Declaration) node);
-            }
         }
     }
 
@@ -39,11 +54,25 @@ public class Evaluator implements Transform {
 
     private Expression evaluateExpression(Expression expression) {
         // TODO: handle operations other than ADD
-        if (expression instanceof Literal) {
+        if (expression instanceof Literal)
             return (Literal) expression;
-        } else {
+        else if (expression instanceof VariableReference)
+            return evaluateVariableReference((VariableReference) expression);
+        else if (expression instanceof AddOperation)
             return evaluateAddOperation((AddOperation) expression);
+        else {
+            expression.setError("Could not evaluate expression");
+            return null;
         }
+    }
+
+    private Literal evaluateVariableReference(VariableReference variableReference) {
+        for (HashMap<String, Literal> map : variableValues) {
+            if (map.containsKey(variableReference.name))
+                return map.get(variableReference.name);
+        }
+        variableReference.setError("Could not evaluate variable");
+        return null;
     }
 
     private Expression evaluateAddOperation(AddOperation expression) {
