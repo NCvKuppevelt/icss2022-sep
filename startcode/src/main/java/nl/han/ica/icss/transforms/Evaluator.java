@@ -4,6 +4,7 @@ import nl.han.ica.icss.ast.*;
 import nl.han.ica.icss.ast.literals.PixelLiteral;
 import nl.han.ica.icss.ast.operations.AddOperation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -23,13 +24,17 @@ public class Evaluator implements Transform {
 
     private void applyStylesheet(Stylesheet stylesheet) {
         variableValues.add(new HashMap<>());
+        ArrayList<ASTNode> nodesToRemove = new ArrayList<>();
         for (ASTNode node : stylesheet.getChildren()) {
             if (node instanceof VariableAssignment) {
                 applyVariableAssignment((VariableAssignment) node);
+                nodesToRemove.add(node);
             }
-            else if (node instanceof Stylerule) {
+            else if (node instanceof Stylerule)
                 applyStylerule((Stylerule) node);
-            }
+        }
+        for (ASTNode node : nodesToRemove) {
+            stylesheet.removeChild(node);
         }
         variableValues.removeFirst();
     }
@@ -76,7 +81,7 @@ public class Evaluator implements Transform {
     }
 
     private Expression evaluateAddOperation(AddOperation expression) {
-        // TODO: handle literals other than PixelLiteral
+        // TODO: handle expressions other than PixelLiteral
         PixelLiteral left  = (PixelLiteral) evaluateExpression(expression.lhs);
         PixelLiteral right = (PixelLiteral) evaluateExpression(expression.rhs);
         return new PixelLiteral(left.value + right.value);
