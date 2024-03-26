@@ -35,6 +35,7 @@ Met betrekking tot het inleveren gelden de volgende eisen:
 ## 4. Eisen
 
 Door de deelopdrachten te realiseren kun je in totaal 120 punten verdienen. Je cijfer is het aantal punten gedeeld door
+
 12.
 
 ### Cesuur-regels:

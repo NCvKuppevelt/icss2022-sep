@@ -32,8 +32,8 @@ public class Generator {
         StringBuilder styleruleString = new StringBuilder();
         for (ASTNode node : rule.getChildren()) {
             if (node instanceof Selector) {
-                styleruleString.append(generate((Selector) node));
-                styleruleString.append(" {\n");
+                styleruleString.append(generate((Selector) node)).append(" {\n");
+//                styleruleString.append(" {\n");
             } else if (node instanceof Declaration) {
                 styleruleString.append("\t");
                 styleruleString.append(generate((Declaration) node));

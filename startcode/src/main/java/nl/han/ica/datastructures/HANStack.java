@@ -16,11 +16,11 @@ public class HANStack<T> implements IHANStack<T> {
 
     @Override
     public T pop() {
-        return stack.remove(stack.size()-1);
+        return stack.remove(stack.size() - 1);
     }
 
     @Override
     public T peek() {
-        return stack.get(stack.size()-1);
+        return stack.get(stack.size() - 1);
     }
 }

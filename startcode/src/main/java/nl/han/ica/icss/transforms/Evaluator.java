@@ -29,8 +29,7 @@ public class Evaluator implements Transform {
             if (node instanceof VariableAssignment) {
                 applyVariableAssignment((VariableAssignment) node);
                 nodesToRemove.add(node);
-            }
-            else if (node instanceof Stylerule)
+            } else if (node instanceof Stylerule)
                 applyStylerule((Stylerule) node);
         }
         for (ASTNode node : nodesToRemove) {
@@ -82,7 +81,7 @@ public class Evaluator implements Transform {
 
     private Expression evaluateAddOperation(AddOperation expression) {
         // TODO: handle expressions other than PixelLiteral
-        PixelLiteral left  = (PixelLiteral) evaluateExpression(expression.lhs);
+        PixelLiteral left = (PixelLiteral) evaluateExpression(expression.lhs);
         PixelLiteral right = (PixelLiteral) evaluateExpression(expression.rhs);
         return new PixelLiteral(left.value + right.value);
     }
