@@ -53,9 +53,9 @@ idSelector: ID_IDENT;
 classSelector: CLASS_IDENT;
 declaration: propertyName COLON (expression|variableReference) SEMICOLON;
 propertyName: LOWER_IDENT;
-expression: (literal | variableReference)
-          | expression MUL expression
-          | expression (PLUS|MIN) expression;
+expression: (literal | variableReference) #litOrVariableRef
+          | expression MUL expression #multiplyOperation
+          | expression (PLUS|MIN) expression #addSubtOperation;
 literal: COLOR #colorLiteral | PIXELSIZE #pixelLiteral | PERCENTAGE #percentageLiteral | (TRUE|FALSE) #boolLiteral | SCALAR #scalarLiteral;
 
 variableAssignment: variableReference ASSIGNMENT_OPERATOR expression SEMICOLON;

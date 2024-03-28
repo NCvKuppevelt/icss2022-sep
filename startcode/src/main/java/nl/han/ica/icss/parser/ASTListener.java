@@ -3,10 +3,10 @@ package nl.han.ica.icss.parser;
 import nl.han.ica.datastructures.HANStack;
 import nl.han.ica.datastructures.IHANStack;
 import nl.han.ica.icss.ast.*;
-import nl.han.ica.icss.ast.literals.BoolLiteral;
-import nl.han.ica.icss.ast.literals.ColorLiteral;
-import nl.han.ica.icss.ast.literals.PercentageLiteral;
-import nl.han.ica.icss.ast.literals.PixelLiteral;
+import nl.han.ica.icss.ast.literals.*;
+import nl.han.ica.icss.ast.operations.AddOperation;
+import nl.han.ica.icss.ast.operations.MultiplyOperation;
+import nl.han.ica.icss.ast.operations.SubtractOperation;
 import nl.han.ica.icss.ast.selectors.ClassSelector;
 import nl.han.ica.icss.ast.selectors.IdSelector;
 import nl.han.ica.icss.ast.selectors.TagSelector;
@@ -115,6 +115,38 @@ public class ASTListener extends ICSSBaseListener {
     }
 
     @Override
+    public void enterMultiplyOperation(ICSSParser.MultiplyOperationContext ctx) {
+        MultiplyOperation multiplyOperation = new MultiplyOperation();
+        currentContainer.add(multiplyOperation);
+    }
+
+    @Override
+    public void exitMultiplyOperation(ICSSParser.MultiplyOperationContext ctx) {
+        MultiplyOperation multiplyOperation = (MultiplyOperation) currentContainer.pop();
+        currentContainer.peek().addChild(multiplyOperation);
+    }
+
+    @Override
+    public void enterAddSubtOperation(ICSSParser.AddSubtOperationContext ctx) {
+        Operation operation;
+        if (ctx.getText().contains("+"))
+            operation = new AddOperation();
+        else
+            operation = new SubtractOperation();
+        currentContainer.add(operation);
+    }
+
+    @Override
+    public void exitAddSubtOperation(ICSSParser.AddSubtOperationContext ctx) {
+        Operation operation;
+        if (ctx.getText().contains("+"))
+            operation = (AddOperation) currentContainer.pop();
+        else
+            operation = (SubtractOperation) currentContainer.pop();
+        currentContainer.peek().addChild(operation);
+    }
+
+    @Override
     public void enterColorLiteral(ICSSParser.ColorLiteralContext ctx) {
         ColorLiteral colorLiteral = new ColorLiteral(ctx.getText());
         currentContainer.add(colorLiteral);
@@ -160,6 +192,18 @@ public class ASTListener extends ICSSBaseListener {
     public void exitBoolLiteral(ICSSParser.BoolLiteralContext ctx) {
         BoolLiteral boolLiteral = (BoolLiteral) currentContainer.pop();
         currentContainer.peek().addChild(boolLiteral);
+    }
+
+    @Override
+    public void enterScalarLiteral(ICSSParser.ScalarLiteralContext ctx) {
+        ScalarLiteral scalarLiteral = new ScalarLiteral(ctx.getText());
+        currentContainer.add((scalarLiteral));
+    }
+
+    @Override
+    public void exitScalarLiteral(ICSSParser.ScalarLiteralContext ctx) {
+        ScalarLiteral scalarLiteral = (ScalarLiteral) currentContainer.pop();
+        currentContainer.peek().addChild(scalarLiteral);
     }
 
     @Override
