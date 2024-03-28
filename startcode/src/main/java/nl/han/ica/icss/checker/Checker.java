@@ -2,6 +2,9 @@ package nl.han.ica.icss.checker;
 
 import nl.han.ica.icss.ast.*;
 import nl.han.ica.icss.ast.literals.*;
+import nl.han.ica.icss.ast.operations.AddOperation;
+import nl.han.ica.icss.ast.operations.MultiplyOperation;
+import nl.han.ica.icss.ast.operations.SubtractOperation;
 import nl.han.ica.icss.ast.selectors.ClassSelector;
 import nl.han.ica.icss.ast.selectors.IdSelector;
 import nl.han.ica.icss.ast.selectors.TagSelector;
@@ -17,10 +20,17 @@ public class Checker {
     private LinkedList<HashMap<String, ExpressionType>> variableTypes;
     private final ArrayList<String> colorProperties = new ArrayList<>();
     private final ArrayList<String> sizeProperties = new ArrayList<>();
+    private final ArrayList<ExpressionType> nonOperableExpTypes = new ArrayList<>();
 
     public Checker() {
         initColorProperties();
         initSizeProperties();
+        initNonOperableExprTypes();
+    }
+
+    private void initNonOperableExprTypes() {
+        nonOperableExpTypes.add(ExpressionType.BOOL);
+        nonOperableExpTypes.add(ExpressionType.COLOR);
     }
 
     private void initColorProperties() {
@@ -56,23 +66,24 @@ public class Checker {
         VariableReference variableReference = (VariableReference) variableAssignment.getChildren().get(0);
         Expression expression = (Expression) variableAssignment.getChildren().get(1);
 
-        if (variableExists(variableReference.name)) {
+        if (variableExists(variableReference.name))
             variableAssignment.setError("Variable already exists in this scope");
-        }
 
-        ExpressionType expressionType = ExpressionType.UNDEFINED;
-        if (expression instanceof PixelLiteral)
-            expressionType = ExpressionType.PIXEL;
-        else if (expression instanceof PercentageLiteral)
-            expressionType = ExpressionType.PERCENTAGE;
-        else if (expression instanceof ColorLiteral)
-            expressionType = ExpressionType.COLOR;
-        else if (expression instanceof BoolLiteral)
-            expressionType = ExpressionType.BOOL;
-        else if (expression instanceof ScalarLiteral)
-            expressionType = ExpressionType.SCALAR;
-        else
-            variableAssignment.setError("Unable to determine expression type");
+        ExpressionType expressionType = checkTypeOfExpression(expression);
+//        if (expression instanceof PixelLiteral)
+//            expressionType = ExpressionType.PIXEL;
+//        else if (expression instanceof PercentageLiteral)
+//            expressionType = ExpressionType.PERCENTAGE;
+//        else if (expression instanceof ColorLiteral)
+//            expressionType = ExpressionType.COLOR;
+//        else if (expression instanceof BoolLiteral)
+//            expressionType = ExpressionType.BOOL;
+//        else if (expression instanceof ScalarLiteral)
+//            expressionType = ExpressionType.SCALAR;
+//        else if (expression instanceof Operation) {
+//            expressionType = checkTypeOfOperation((Operation) expression);
+//        } else
+//            variableAssignment.setError("Unable to determine expression type");
 
         variableTypes.getFirst().put(variableReference.name, expressionType);
 
@@ -89,7 +100,6 @@ public class Checker {
     }
 
     private void check(VariableReference variableReference) {
-
     }
 
     private void check(Stylerule rule) {
@@ -115,36 +125,32 @@ public class Checker {
     }
 
     private void check(TagSelector tagSelector) {
-
     }
 
     private void check(IdSelector idSelector) {
-
     }
 
     private void check(ClassSelector classSelector) {
-
     }
 
     private void check(Declaration declaration) {
         PropertyName propertyName = (PropertyName) declaration.getChildren().get(0);
         Expression expression = (Expression) declaration.getChildren().get(1);
-        ExpressionType type = getType(expression);
+        ExpressionType type = checkTypeOfExpression(expression);
 
         if ((colorProperties.contains(propertyName.name) && !(type == ExpressionType.COLOR)) ||
                 sizeProperties.contains(propertyName.name) && !(type == ExpressionType.PIXEL || type == ExpressionType.PERCENTAGE)) {
-            declaration.setError("Property-ExpressionType mismatch");
+            declaration.setError("Property name " + propertyName.name + " with expressionType " + type + " is a mismatch");
         } else {
             check(propertyName);
             check(expression);
         }
-
     }
 
-    private ExpressionType getType(Expression expression) {
-        if (expression instanceof VariableReference)
-            return getTypeOfVariable(((VariableReference) expression).name);
-        else if (expression instanceof PixelLiteral)
+    private ExpressionType checkTypeOfExpression(Expression expression) {
+        if (expression instanceof VariableReference) {
+            return getTypeOfVariable((VariableReference) expression);
+        } else if (expression instanceof PixelLiteral)
             return ExpressionType.PIXEL;
         else if (expression instanceof PercentageLiteral)
             return ExpressionType.PERCENTAGE;
@@ -154,16 +160,42 @@ public class Checker {
             return ExpressionType.BOOL;
         else if (expression instanceof ScalarLiteral)
             return ExpressionType.SCALAR;
+        else if (expression instanceof Operation)
+            return checkTypeOfOperation((Operation) expression);
         else
             expression.setError("Expression of unknown type");
         return null;
     }
 
-    private ExpressionType getTypeOfVariable(String name) {
+    private ExpressionType checkTypeOfOperation(Operation operation) {
+        ExpressionType lhsType = checkTypeOfExpression(operation.lhs);
+        ExpressionType rhsType = checkTypeOfExpression(operation.rhs);
+
+        if (nonOperableExpTypes.contains(lhsType) || nonOperableExpTypes.contains(rhsType)) {
+            operation.setError("Cannot perform operations on a boolean or color");
+        } else if (operation instanceof AddOperation || operation instanceof SubtractOperation) {
+            if (lhsType != rhsType)
+                operation.setError("Expressions on both sides of an add or subtract operation must be of same type");
+            else
+                return lhsType;
+        } else if (operation instanceof MultiplyOperation) {
+            if (lhsType != ExpressionType.SCALAR && rhsType != ExpressionType.SCALAR)
+                operation.setError("Multiplication needs at least one scalar");
+            else if (lhsType == ExpressionType.SCALAR)
+                return rhsType;
+            else
+                return lhsType;
+        }
+        return null;
+    }
+
+    private ExpressionType getTypeOfVariable(VariableReference variableReference) {
+        String name = variableReference.name;
         for (HashMap<String, ExpressionType> map : variableTypes) {
             if (map.containsKey(name))
                 return map.get(name);
         }
+        variableReference.setError("Could not find type of variable");
         return null;
     }
 
@@ -183,28 +215,28 @@ public class Checker {
             check((BoolLiteral) expression);
         else if (expression instanceof ScalarLiteral)
             check((ScalarLiteral) expression);
+        else if (expression instanceof Operation)
+            check((Operation) expression);
         else
-            expression.setError("Expression of unknown type");
+            expression.setError("Expression of unknown instance");
     }
 
     private void check(PixelLiteral pixelLiteral) {
-
     }
 
     private void check(PercentageLiteral percentageLiteral) {
-
     }
 
     private void check(ColorLiteral colorLiteral) {
-
     }
 
     private void check(BoolLiteral boolLiteral) {
-
     }
 
     private void check(ScalarLiteral scalarLiteral) {
+    }
 
+    private void check(Operation operation) {
     }
 
 }
