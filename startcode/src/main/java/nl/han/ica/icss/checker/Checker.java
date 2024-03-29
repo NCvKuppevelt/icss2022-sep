@@ -46,38 +46,37 @@ public class Checker {
     public void check(AST ast) {
         variableTypes = new LinkedList<>();
 
-        check(ast.root);
+        checkStylesheet(ast.root);
     }
 
-    private void check(Stylesheet sheet) {
+    private void checkStylesheet(Stylesheet sheet) {
         variableTypes.addFirst(new HashMap<>());
         for (ASTNode node : sheet.getChildren()) {
             if (node instanceof VariableAssignment)
-                check((VariableAssignment) node);
+                checkVariableAssignment((VariableAssignment) node);
             else if (node instanceof Stylerule)
-                check((Stylerule) node);
+                checkStylerule((Stylerule) node);
             else
                 node.setError("Unknown type as child of Stylesheet");
         }
         variableTypes.removeFirst();
     }
 
-    private void check(VariableAssignment variableAssignment) {
+    private void checkVariableAssignment(VariableAssignment variableAssignment) {
         VariableReference variableReference = (VariableReference) variableAssignment.getChildren().get(0);
         Expression expression = (Expression) variableAssignment.getChildren().get(1);
 
-        if (variableDefined(variableReference.name))
+        if (variableIsDefined(variableReference.name))
             variableAssignment.setError("Variable already exists in this scope");
 
         ExpressionType expressionType = checkTypeOfExpression(expression);
 
         variableTypes.getFirst().put(variableReference.name, expressionType);
 
-        check(variableReference);
         check(expression);
     }
 
-    private boolean variableDefined(String name) {
+    private boolean variableIsDefined(String name) {
         for (HashMap<String, ExpressionType> map : variableTypes) {
             if (map.containsKey(name))
                 return true;
@@ -85,23 +84,20 @@ public class Checker {
         return false;
     }
 
-    private void check(VariableReference variableReference) {
-    }
-
-    private void check(Stylerule rule) {
+    private void checkStylerule(Stylerule rule) {
         for (ASTNode node : rule.getChildren()) {
             if (node instanceof Selector)
-                check((Selector) node);
+                checkSelector((Selector) node);
             else if (node instanceof Declaration)
-                check((Declaration) node);
+                checkDeclaration((Declaration) node);
             else if (node instanceof IfClause)
-                check((IfClause) node);
+                checkIfClause((IfClause) node);
             else
                 node.setError("Unknown type as child of Stylerule");
         }
     }
 
-    private void check(IfClause ifClause) {
+    private void checkIfClause(IfClause ifClause) {
         for (ASTNode node : ifClause.getChildren()) {
             if (node instanceof VariableReference) {
                 if (getTypeOfVariable((VariableReference) node) != ExpressionType.BOOL)
@@ -109,41 +105,23 @@ public class Checker {
             } else if (node instanceof BoolLiteral)
                 check((BoolLiteral) node);
             else if (node instanceof Declaration)
-                check((Declaration) node);
-            else if (node instanceof ElseClause)
-                check((ElseClause) node);
+                checkDeclaration((Declaration) node);
             else if (node instanceof IfClause)
-                check((IfClause) node);
-            else
+                checkIfClause((IfClause) node);
+            else if (!(node instanceof ElseClause))
                 node.setError("Unknown type as child of IfClause");
         }
     }
 
-    private void check(ElseClause elseClause) {
-
-    }
-
-    private void check(Selector selector) {
-        if (selector instanceof TagSelector)
-            check((TagSelector) selector);
-        else if (selector instanceof IdSelector)
-            check((IdSelector) selector);
-        else if (selector instanceof ClassSelector)
-            check((ClassSelector) selector);
-        else
+    private void checkSelector(Selector selector) {
+        if (!(selector instanceof TagSelector
+                || selector instanceof IdSelector
+                || selector instanceof ClassSelector)) {
             selector.setError("Selector of unknown type");
+        }
     }
 
-    private void check(TagSelector tagSelector) {
-    }
-
-    private void check(IdSelector idSelector) {
-    }
-
-    private void check(ClassSelector classSelector) {
-    }
-
-    private void check(Declaration declaration) {
+    private void checkDeclaration(Declaration declaration) {
         PropertyName propertyName = (PropertyName) declaration.getChildren().get(0);
         Expression expression = (Expression) declaration.getChildren().get(1);
         ExpressionType type = checkTypeOfExpression(expression);
@@ -152,7 +130,6 @@ public class Checker {
                 sizeProperties.contains(propertyName.name) && !(type == ExpressionType.PIXEL || type == ExpressionType.PERCENTAGE)) {
             declaration.setError("Property name " + propertyName.name + " with expressionType " + type + " is a mismatch");
         } else {
-            check(propertyName);
             check(expression);
         }
     }
@@ -201,7 +178,7 @@ public class Checker {
 
     private ExpressionType getTypeOfVariable(VariableReference variableReference) {
         String name = variableReference.name;
-        if (!variableDefined(name))
+        if (!variableIsDefined(name))
             variableReference.setError("Undefined variable");
         else {
             for (HashMap<String, ExpressionType> map : variableTypes) {
@@ -212,44 +189,11 @@ public class Checker {
         return null;
     }
 
-    private void check(PropertyName propertyName) {
-    }
-
     private void check(Expression expression) {
-        if (expression instanceof VariableReference)
-            check((VariableReference) expression);
-        else if (expression instanceof PixelLiteral)
-            check((PixelLiteral) expression);
-        else if (expression instanceof PercentageLiteral)
-            check((PercentageLiteral) expression);
-        else if (expression instanceof ColorLiteral)
-            check((ColorLiteral) expression);
-        else if (expression instanceof BoolLiteral)
-            check((BoolLiteral) expression);
-        else if (expression instanceof ScalarLiteral)
-            check((ScalarLiteral) expression);
-        else if (expression instanceof Operation)
-            check((Operation) expression);
-        else
+        if (!(expression instanceof VariableReference
+                || expression instanceof Literal
+                || expression instanceof Operation)) {
             expression.setError("Expression of unknown instance");
+        }
     }
-
-    private void check(PixelLiteral pixelLiteral) {
-    }
-
-    private void check(PercentageLiteral percentageLiteral) {
-    }
-
-    private void check(ColorLiteral colorLiteral) {
-    }
-
-    private void check(BoolLiteral boolLiteral) {
-    }
-
-    private void check(ScalarLiteral scalarLiteral) {
-    }
-
-    private void check(Operation operation) {
-    }
-
 }
