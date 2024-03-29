@@ -229,4 +229,28 @@ public class ASTListener extends ICSSBaseListener {
         VariableReference variableReference = (VariableReference) currentContainer.pop();
         currentContainer.peek().addChild(variableReference);
     }
+
+    @Override
+    public void enterIfClause(ICSSParser.IfClauseContext ctx) {
+        IfClause ifClause = new IfClause();
+        currentContainer.add(ifClause);
+    }
+
+    @Override
+    public void exitIfClause(ICSSParser.IfClauseContext ctx) {
+        IfClause ifClause = (IfClause) currentContainer.pop();
+        currentContainer.peek().addChild(ifClause);
+    }
+
+    @Override
+    public void enterElseClause(ICSSParser.ElseClauseContext ctx) {
+        ElseClause elseClause = new ElseClause();
+        currentContainer.add(elseClause);
+    }
+
+    @Override
+    public void exitElseClause(ICSSParser.ElseClauseContext ctx) {
+        ElseClause elseClause = (ElseClause) currentContainer.pop();
+        currentContainer.peek().addChild(elseClause);
+    }
 }
