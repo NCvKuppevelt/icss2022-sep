@@ -28,7 +28,7 @@ extra kolom aan het begin: of ik die eis wel of niet gehaald heb.
 | Ja                               | GE02 | Zorg dat de CSS met twee spaties inspringing per scopeniveau gegenereerd wordt.                                                                                                                                                                                                                                                                                                                                                                       | Must   | 5      | APP-2, APP-6, APP-7  |
 
 # Eigen uitbreiding
-Ik heb geen extra uitbreidingen uitgewerkt.
+Ik heb één kleine eigen uitbreiding uitgewerkt: haakjes in expressies. Bijv. de expressie (20px + 10px) * 3 komt uit op 90px terwijl * normaal vóór + gaat.  
 
 # Git-repo
 De Git repo is hier te vinden: https://github.com/NCvKuppevelt/icss2022-sep

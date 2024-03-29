@@ -36,6 +36,8 @@ OPEN_BRACE: '{';
 CLOSE_BRACE: '}';
 SEMICOLON: ';';
 COLON: ':';
+OPEN_ROUND_BRACKET: '(';
+CLOSE_ROUND_BRACKET: ')';
 PLUS: '+';
 MIN: '-';
 MUL: '*';
@@ -49,6 +51,7 @@ stylesheet: variableAssignment* stylerule+;
 variableAssignment: variableReference ASSIGNMENT_OPERATOR expression SEMICOLON;
 variableReference: CAPITAL_IDENT;
 expression: (literal | variableReference) #litOrVariableRef
+          | OPEN_ROUND_BRACKET expression CLOSE_ROUND_BRACKET #bracketedExpression
           | expression MUL expression #multiplyOperation
           | expression (PLUS|MIN) expression #addSubtOperation;
 literal: COLOR #colorLiteral | PIXELSIZE #pixelLiteral | PERCENTAGE #percentageLiteral | (TRUE|FALSE) #boolLiteral | SCALAR #scalarLiteral;
