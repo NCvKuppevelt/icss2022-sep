@@ -23,7 +23,6 @@ public class Generator {
                         .append(generate((Stylerule) node))
                         .append("\n");
             }
-            return null;
         }
         return stylesheetString.toString();
     }
