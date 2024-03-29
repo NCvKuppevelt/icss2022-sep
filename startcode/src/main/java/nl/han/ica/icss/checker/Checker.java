@@ -66,7 +66,7 @@ public class Checker {
         VariableReference variableReference = (VariableReference) variableAssignment.getChildren().get(0);
         Expression expression = (Expression) variableAssignment.getChildren().get(1);
 
-        if (variableExists(variableReference.name))
+        if (variableDefined(variableReference.name))
             variableAssignment.setError("Variable already exists in this scope");
 
         ExpressionType expressionType = checkTypeOfExpression(expression);
@@ -77,7 +77,7 @@ public class Checker {
         check(expression);
     }
 
-    private boolean variableExists(String name) {
+    private boolean variableDefined(String name) {
         for (HashMap<String, ExpressionType> map : variableTypes) {
             if (map.containsKey(name))
                 return true;
@@ -199,7 +199,7 @@ public class Checker {
 
     private ExpressionType getTypeOfVariable(VariableReference variableReference) {
         String name = variableReference.name;
-        if (!variableExists(name))
+        if (!variableDefined(name))
             variableReference.setError("Undefined variable");
         else {
             for (HashMap<String, ExpressionType> map : variableTypes) {
