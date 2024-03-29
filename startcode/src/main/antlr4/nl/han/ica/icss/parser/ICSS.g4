@@ -52,9 +52,12 @@ expression: (literal | variableReference) #litOrVariableRef
           | expression MUL expression #multiplyOperation
           | expression (PLUS|MIN) expression #addSubtOperation;
 literal: COLOR #colorLiteral | PIXELSIZE #pixelLiteral | PERCENTAGE #percentageLiteral | (TRUE|FALSE) #boolLiteral | SCALAR #scalarLiteral;
-stylerule: (tagSelector|idSelector|classSelector) OPEN_BRACE declaration+ CLOSE_BRACE;
+stylerule: (tagSelector|idSelector|classSelector) OPEN_BRACE body CLOSE_BRACE;
 tagSelector: LOWER_IDENT;
 idSelector: ID_IDENT;
 classSelector: CLASS_IDENT;
+body: (declaration|ifClause)+;
 declaration: propertyName COLON (expression|variableReference) SEMICOLON;
 propertyName: LOWER_IDENT;
+ifClause: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body CLOSE_BRACE elseClause?;
+elseClause: ELSE OPEN_BRACE body CLOSE_BRACE;
