@@ -149,6 +149,18 @@ public class ASTListener extends ICSSBaseListener {
     }
 
     @Override
+    public void enterOrOperation(ICSSParser.OrOperationContext ctx) {
+        OrOperation orOperation = new OrOperation();
+        currentContainer.add(orOperation);
+    }
+
+    @Override
+    public void exitOrOperation(ICSSParser.OrOperationContext ctx) {
+        OrOperation orOperation = (OrOperation) currentContainer.pop();
+        currentContainer.peek().addChild(orOperation);
+    }
+
+    @Override
     public void enterAddSubtOperation(ICSSParser.AddSubtOperationContext ctx) {
         Operation operation;
         if (ctx.getText().contains("+"))

@@ -161,32 +161,35 @@ public class Checker {
         ExpressionType lhsType = checkTypeOfExpression(operation.lhs);
         ExpressionType rhsType = checkTypeOfExpression(operation.rhs);
 
-        if ((nonArithmeticExpTypes.contains(lhsType) || nonArithmeticExpTypes.contains(rhsType))
-                && isArithmeticOperation(operation)) {
-            operation.setError("Cannot perform arithmetic operations on a boolean or color");
-        } else if (operation instanceof AddOperation || operation instanceof SubtractOperation) {
-            if (lhsType != rhsType)
-                operation.setError("Expressions on both sides of an add or subtract operation must be of same type");
-            else
-                return lhsType;
-        } else if (operation instanceof MultiplyOperation) {
-            if (lhsType != ExpressionType.SCALAR && rhsType != ExpressionType.SCALAR)
-                operation.setError("Multiplication needs at least one scalar");
-            else if (lhsType == ExpressionType.SCALAR)
-                return rhsType;
-            else
-                return lhsType;
-        } else if (operation instanceof NotOperation) {
-            if (rhsType != ExpressionType.BOOL)
-                operation.setError("Only a boolean value can be used with a NOT operation");
-            else
-                return rhsType;
-        } else if (operation instanceof AndOperation) {
+        if (isArithmeticOperation(operation)) {
+            if (nonArithmeticExpTypes.contains(lhsType) || nonArithmeticExpTypes.contains(rhsType)) {
+                operation.setError("Cannot perform arithmetic operations on a boolean or color");
+            } else if (operation instanceof AddOperation || operation instanceof SubtractOperation) {
+                if (lhsType != rhsType)
+                    operation.setError("Expressions on both sides of an add or subtract operation must be of same type");
+                else
+                    return lhsType;
+            } else if (operation instanceof MultiplyOperation) {
+                if (lhsType != ExpressionType.SCALAR && rhsType != ExpressionType.SCALAR)
+                    operation.setError("Multiplication needs at least one scalar");
+                else if (lhsType == ExpressionType.SCALAR)
+                    return rhsType;
+                else
+                    return lhsType;
+            }
+        } else if (isBooleanOperation(operation)) {
             if (lhsType != ExpressionType.BOOL || rhsType != ExpressionType.BOOL)
-                operation.setError("Only a boolean value can be used with an AND operation");
-            else return lhsType;
+                operation.setError("Boolean operations can only take boolean values");
+            else
+                return rhsType;
         }
         return null;
+    }
+
+    private boolean isBooleanOperation(Operation operation) {
+        return operation instanceof NotOperation
+                || operation instanceof AndOperation
+                || operation instanceof OrOperation;
     }
 
     private boolean isArithmeticOperation(Operation operation) {

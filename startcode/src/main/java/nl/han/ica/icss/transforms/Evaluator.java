@@ -108,13 +108,22 @@ public class Evaluator implements Transform {
             return evaluateNotOperation((NotOperation) operation);
         else if (operation instanceof AndOperation)
             return evaluateAndOperation((AndOperation) operation);
+        else if (operation instanceof OrOperation)
+            return evaluateOrOperation((OrOperation) operation);
         return null;
+    }
+
+    private BoolLiteral evaluateOrOperation(OrOperation operation) {
+        BoolLiteral lhs = (BoolLiteral) evaluateExpression(operation.lhs);
+        BoolLiteral rhs = (BoolLiteral) evaluateExpression(operation.rhs);
+        assert lhs != null; assert rhs != null;
+        return new BoolLiteral(lhs.value || rhs.value);
     }
 
     private BoolLiteral evaluateAndOperation(AndOperation operation) {
         BoolLiteral lhs = (BoolLiteral) evaluateExpression(operation.lhs);
         BoolLiteral rhs = (BoolLiteral) evaluateExpression(operation.rhs);
-        assert lhs != null;assert rhs != null;
+        assert lhs != null; assert rhs != null;
         return new BoolLiteral(lhs.value && rhs.value);
     }
 
