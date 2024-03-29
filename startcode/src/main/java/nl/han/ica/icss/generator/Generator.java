@@ -12,32 +12,32 @@ import nl.han.ica.icss.ast.selectors.TagSelector;
 public class Generator {
 
     public String generate(AST ast) {
-        return generate(ast.root);
+        return generateStylesheet(ast.root);
     }
 
-    private String generate(Stylesheet stylesheet) {
+    private String generateStylesheet(Stylesheet stylesheet) {
         StringBuilder stylesheetString = new StringBuilder();
         for (ASTNode node : stylesheet.getChildren()) {
             if (node instanceof Stylerule) {
                 stylesheetString
-                        .append(generate((Stylerule) node))
+                        .append(generateStylerule((Stylerule) node))
                         .append("\n");
             }
         }
         return stylesheetString.toString();
     }
 
-    private String generate(Stylerule rule) {
+    private String generateStylerule(Stylerule rule) {
         StringBuilder styleruleString = new StringBuilder();
         for (ASTNode node : rule.getChildren()) {
             if (node instanceof Selector) {
                 styleruleString
-                        .append(generate((Selector) node))
+                        .append(generateSelector((Selector) node))
                         .append(" {\n");
             } else if (node instanceof Declaration) {
                 styleruleString
                         .append("  ")
-                        .append(generate((Declaration) node))
+                        .append(generateDeclaration((Declaration) node))
                         .append("\n");
             }
         }
@@ -45,7 +45,7 @@ public class Generator {
         return styleruleString.toString();
     }
 
-    private String generate(Selector selector) {
+    private String generateSelector(Selector selector) {
         if (selector instanceof TagSelector)
             return ((TagSelector) selector).tag;
         if (selector instanceof ClassSelector)
@@ -55,11 +55,11 @@ public class Generator {
         return null;
     }
 
-    private String generate(Declaration declaration) {
-        return declaration.property.name + ": " + generate(declaration.expression) + ";";
+    private String generateDeclaration(Declaration declaration) {
+        return declaration.property.name + ": " + generateExpression(declaration.expression) + ";";
     }
 
-    private String generate(Expression expression) {
+    private String generateExpression(Expression expression) {
         if (expression instanceof PixelLiteral)
             return ((PixelLiteral) expression).value + "px";
         else if (expression instanceof PercentageLiteral)
