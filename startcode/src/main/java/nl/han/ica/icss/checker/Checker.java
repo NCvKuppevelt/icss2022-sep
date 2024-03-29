@@ -105,12 +105,14 @@ public class Checker {
         for (ASTNode node : ifClause.getChildren()) {
             if (node instanceof VariableReference) {
                 if (getTypeOfVariable((VariableReference) node) != ExpressionType.BOOL)
-                    node.setError("If-clause must be a boolean");
-            } else if (node instanceof Declaration)
+                    node.setError("If-clause condition must be a boolean");
+            } else if (node instanceof BoolLiteral)
+                check((BoolLiteral) node);
+            else if (node instanceof Declaration)
                 check((Declaration) node);
-            else if (node instanceof ElseClause) {
+            else if (node instanceof ElseClause)
                 check((ElseClause) node);
-            } else if (node instanceof IfClause)
+            else if (node instanceof IfClause)
                 check((IfClause) node);
             else
                 node.setError("Unknown type as child of IfClause");
