@@ -29,3 +29,6 @@ extra kolom aan het begin: of ik die eis wel of niet gehaald heb.
 
 # Eigen uitbreiding
 Ik heb geen extra uitbreidingen uitgewerkt.
+
+# Git-repo
+De Git repo is hier te vinden: https://github.com/NCvKuppevelt/icss2022-sep
