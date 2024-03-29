@@ -94,9 +94,32 @@ public class Checker {
                 check((Selector) node);
             else if (node instanceof Declaration)
                 check((Declaration) node);
+            else if (node instanceof IfClause)
+                check((IfClause) node);
             else
                 node.setError("Unknown type as child of Stylerule");
         }
+    }
+
+    private void check(IfClause ifClause) {
+        for (ASTNode node : ifClause.getChildren()) {
+            if (node instanceof VariableReference) {
+                if (getTypeOfVariable((VariableReference) node) != ExpressionType.BOOL)
+                    node.setError("If-clause must be a boolean");
+            }
+            else if (node instanceof Declaration)
+                check((Declaration) node);
+            else if (node instanceof ElseClause) {
+                check ((ElseClause) node);
+            } else if (node instanceof IfClause)
+                check((IfClause) node);
+            else
+                node.setError("Unknown type as child of IfClause");
+        }
+    }
+
+    private void check(ElseClause elseClause) {
+
     }
 
     private void check(Selector selector) {
