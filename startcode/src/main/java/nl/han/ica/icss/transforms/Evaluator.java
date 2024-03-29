@@ -1,6 +1,7 @@
 package nl.han.ica.icss.transforms;
 
 import nl.han.ica.icss.ast.*;
+import nl.han.ica.icss.ast.literals.BoolLiteral;
 import nl.han.ica.icss.ast.literals.PercentageLiteral;
 import nl.han.ica.icss.ast.literals.PixelLiteral;
 import nl.han.ica.icss.ast.literals.ScalarLiteral;
@@ -50,10 +51,29 @@ public class Evaluator implements Transform {
     }
 
     private void applyStylerule(Stylerule stylerule) {
-        for (ASTNode node : stylerule.getChildren()) {
-            if (node instanceof Declaration)
+        ArrayList<ASTNode> body = stylerule.body;
+        stylerule.body = evaluateBody(body);
+    }
+
+    private ArrayList<ASTNode> evaluateBody(ArrayList<ASTNode> body) {
+        ArrayList<ASTNode> nodesToKeep = new ArrayList<>();
+        for (ASTNode node : body) {
+            if (node instanceof Declaration) {
                 applyDeclaration((Declaration) node);
+                nodesToKeep.add(node);
+            } else if (node instanceof IfClause)
+                nodesToKeep.addAll(evaluateIfClause((IfClause) node));
         }
+        return nodesToKeep;
+    }
+
+    private ArrayList<ASTNode> evaluateIfClause(IfClause ifClause) {
+        BoolLiteral boolLiteral = (BoolLiteral) evaluateExpression(ifClause.getConditionalExpression());
+        if (boolLiteral != null && boolLiteral.value)
+            return evaluateBody(ifClause.body);
+        else if (ifClause.elseClause != null)
+            return evaluateBody(ifClause.elseClause.body);
+        return new ArrayList<>();
     }
 
     private void applyDeclaration(Declaration declaration) {
