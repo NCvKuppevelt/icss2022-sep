@@ -1,8 +1,12 @@
 package nl.han.ica.icss.transforms;
 
 import nl.han.ica.icss.ast.*;
+import nl.han.ica.icss.ast.literals.PercentageLiteral;
 import nl.han.ica.icss.ast.literals.PixelLiteral;
+import nl.han.ica.icss.ast.literals.ScalarLiteral;
 import nl.han.ica.icss.ast.operations.AddOperation;
+import nl.han.ica.icss.ast.operations.MultiplyOperation;
+import nl.han.ica.icss.ast.operations.SubtractOperation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,17 +57,17 @@ public class Evaluator implements Transform {
     }
 
     private void applyDeclaration(Declaration declaration) {
-        declaration.expression = evaluateExpression(declaration.expression);
+        Expression expression = declaration.expression;
+        declaration.expression = evaluateExpression(expression);
     }
 
     private Expression evaluateExpression(Expression expression) {
-        // TODO: handle operations other than ADD
         if (expression instanceof Literal)
             return (Literal) expression;
         else if (expression instanceof VariableReference)
             return evaluateVariableReference((VariableReference) expression);
-        else if (expression instanceof AddOperation)
-            return evaluateAddOperation((AddOperation) expression);
+        else if (expression instanceof Operation)
+            return evaluateOperation((Operation) expression);
         else {
             expression.setError("Could not evaluate expression");
             return null;
@@ -79,11 +83,54 @@ public class Evaluator implements Transform {
         return null;
     }
 
-    private Expression evaluateAddOperation(AddOperation expression) {
-        // TODO: handle expressions other than PixelLiteral
-        PixelLiteral left = (PixelLiteral) evaluateExpression(expression.lhs);
-        PixelLiteral right = (PixelLiteral) evaluateExpression(expression.rhs);
-        return new PixelLiteral(left.value + right.value);
+    private Expression evaluateOperation(Operation operation) {
+        if (operation instanceof MultiplyOperation)
+            return evaluateMultiplyOperation((MultiplyOperation) operation);
+        else if (operation instanceof AddOperation)
+            return evaluateAddOperation((AddOperation) operation);
+        else if (operation instanceof SubtractOperation) {
+            return evaluateSubtractOperation((SubtractOperation) operation);
+        }
+        return null;
     }
 
+    private Expression evaluateMultiplyOperation(MultiplyOperation operation) {
+        Expression lhs = evaluateExpression(operation.lhs);
+        Expression rhs = evaluateExpression(operation.rhs);
+        if (lhs instanceof PixelLiteral && rhs instanceof ScalarLiteral)
+            return new PixelLiteral(((PixelLiteral) lhs).value * ((ScalarLiteral) rhs).value);
+        else if (lhs instanceof ScalarLiteral && rhs instanceof PixelLiteral)
+            return new PixelLiteral(((ScalarLiteral) lhs).value * ((PixelLiteral) rhs).value);
+        else if (lhs instanceof PercentageLiteral && rhs instanceof ScalarLiteral)
+            return new PercentageLiteral(((PercentageLiteral) lhs).value * ((ScalarLiteral) rhs).value);
+        else if (lhs instanceof ScalarLiteral && rhs instanceof PercentageLiteral)
+            return new PercentageLiteral(((ScalarLiteral) lhs).value * ((PercentageLiteral) rhs).value);
+        else if (lhs instanceof ScalarLiteral && rhs instanceof ScalarLiteral)
+            return new ScalarLiteral(((ScalarLiteral) lhs).value * ((ScalarLiteral) rhs).value);
+        return null;
+    }
+
+    private Expression evaluateAddOperation(AddOperation operation) {
+        Expression lhs = evaluateExpression(operation.lhs);
+        Expression rhs = evaluateExpression(operation.rhs);
+        if (lhs instanceof ScalarLiteral && rhs instanceof ScalarLiteral)
+            return new ScalarLiteral(((ScalarLiteral) lhs).value + ((ScalarLiteral) rhs).value);
+        else if (lhs instanceof PixelLiteral && rhs instanceof PixelLiteral)
+            return new PixelLiteral(((PixelLiteral) lhs).value + ((PixelLiteral) rhs).value);
+        else if (lhs instanceof PercentageLiteral && rhs instanceof PercentageLiteral)
+            return new PercentageLiteral(((PercentageLiteral) lhs).value + ((PercentageLiteral) rhs).value);
+        return null;
+    }
+
+    private Expression evaluateSubtractOperation(SubtractOperation operation) {
+        Expression lhs = evaluateExpression(operation.lhs);
+        Expression rhs = evaluateExpression(operation.rhs);
+        if (lhs instanceof ScalarLiteral && rhs instanceof ScalarLiteral)
+            return new ScalarLiteral(((ScalarLiteral) lhs).value - ((ScalarLiteral) rhs).value);
+        else if (lhs instanceof PixelLiteral && rhs instanceof PixelLiteral)
+            return new PixelLiteral(((PixelLiteral) lhs).value - ((PixelLiteral) rhs).value);
+        else if (lhs instanceof PercentageLiteral && rhs instanceof PercentageLiteral)
+            return new PercentageLiteral(((PercentageLiteral) lhs).value - ((PercentageLiteral) rhs).value);
+        return null;
+    }
 }

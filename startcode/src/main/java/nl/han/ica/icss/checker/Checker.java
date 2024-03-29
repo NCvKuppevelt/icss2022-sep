@@ -70,20 +70,6 @@ public class Checker {
             variableAssignment.setError("Variable already exists in this scope");
 
         ExpressionType expressionType = checkTypeOfExpression(expression);
-//        if (expression instanceof PixelLiteral)
-//            expressionType = ExpressionType.PIXEL;
-//        else if (expression instanceof PercentageLiteral)
-//            expressionType = ExpressionType.PERCENTAGE;
-//        else if (expression instanceof ColorLiteral)
-//            expressionType = ExpressionType.COLOR;
-//        else if (expression instanceof BoolLiteral)
-//            expressionType = ExpressionType.BOOL;
-//        else if (expression instanceof ScalarLiteral)
-//            expressionType = ExpressionType.SCALAR;
-//        else if (expression instanceof Operation) {
-//            expressionType = checkTypeOfOperation((Operation) expression);
-//        } else
-//            variableAssignment.setError("Unable to determine expression type");
 
         variableTypes.getFirst().put(variableReference.name, expressionType);
 
