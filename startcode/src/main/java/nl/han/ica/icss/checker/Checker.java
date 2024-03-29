@@ -106,11 +106,10 @@ public class Checker {
             if (node instanceof VariableReference) {
                 if (getTypeOfVariable((VariableReference) node) != ExpressionType.BOOL)
                     node.setError("If-clause must be a boolean");
-            }
-            else if (node instanceof Declaration)
+            } else if (node instanceof Declaration)
                 check((Declaration) node);
             else if (node instanceof ElseClause) {
-                check ((ElseClause) node);
+                check((ElseClause) node);
             } else if (node instanceof IfClause)
                 check((IfClause) node);
             else
@@ -200,11 +199,14 @@ public class Checker {
 
     private ExpressionType getTypeOfVariable(VariableReference variableReference) {
         String name = variableReference.name;
-        for (HashMap<String, ExpressionType> map : variableTypes) {
-            if (map.containsKey(name))
-                return map.get(name);
+        if (!variableExists(name))
+            variableReference.setError("Undefined variable");
+        else {
+            for (HashMap<String, ExpressionType> map : variableTypes) {
+                if (map.containsKey(name))
+                    return map.get(name);
+            }
         }
-        variableReference.setError("Could not find type of variable");
         return null;
     }
 
