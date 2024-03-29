@@ -30,6 +30,7 @@ extra kolom aan het begin: of ik die eis wel of niet gehaald heb.
 # Eigen uitbreiding
 Ik heb één kleine eigen uitbreiding uitgewerkt: haakjes in expressies. Bijv. de expressie (20px + 10px) * 3 komt uit op 90px terwijl * normaal vóór + gaat.
 Ook heb ik de NOT-operator '!' uitgewerkt. Ik wilde nog wel andere boolean operators proberen maar het is nu al 21:04 dus ik zal dit maar inleveren.
+AND-operator '&&' uitgewerkt! (het is nu 21:26).
 
 # Git-repo
 De Git repo is hier te vinden: https://github.com/NCvKuppevelt/icss2022-sep

@@ -4,10 +4,7 @@ import nl.han.ica.datastructures.HANStack;
 import nl.han.ica.datastructures.IHANStack;
 import nl.han.ica.icss.ast.*;
 import nl.han.ica.icss.ast.literals.*;
-import nl.han.ica.icss.ast.operations.AddOperation;
-import nl.han.ica.icss.ast.operations.MultiplyOperation;
-import nl.han.ica.icss.ast.operations.NotOperation;
-import nl.han.ica.icss.ast.operations.SubtractOperation;
+import nl.han.ica.icss.ast.operations.*;
 import nl.han.ica.icss.ast.selectors.ClassSelector;
 import nl.han.ica.icss.ast.selectors.IdSelector;
 import nl.han.ica.icss.ast.selectors.TagSelector;
@@ -137,6 +134,18 @@ public class ASTListener extends ICSSBaseListener {
     public void exitNotOperation(ICSSParser.NotOperationContext ctx) {
         NotOperation notOperation = (NotOperation) currentContainer.pop();
         currentContainer.peek().addChild(notOperation);
+    }
+
+    @Override
+    public void enterAndOperation(ICSSParser.AndOperationContext ctx) {
+        AndOperation andOperation = new AndOperation();
+        currentContainer.add(andOperation);
+    }
+
+    @Override
+    public void exitAndOperation(ICSSParser.AndOperationContext ctx) {
+        AndOperation andOperation = (AndOperation) currentContainer.pop();
+        currentContainer.peek().addChild(andOperation);
     }
 
     @Override

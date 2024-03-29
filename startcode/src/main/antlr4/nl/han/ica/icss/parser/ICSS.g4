@@ -48,7 +48,7 @@ NOT: '!';
 //EQUALS: '==';
 //NOT_EQUALS: '!=';
 //XOR: '^';
-//AND: '&&';
+AND: '&&';
 //OR: '||';
 
 
@@ -62,7 +62,8 @@ expression: (literal | variableReference) #litOrVariableRef
           | OPEN_ROUND_BRACKET expression CLOSE_ROUND_BRACKET #bracketedExpression
           | expression MUL expression #multiplyOperation
           | expression (PLUS|MIN) expression #addSubtOperation
-          | NOT expression #notOperation;
+          | NOT expression #notOperation
+          | expression AND expression #andOperation;
 literal: COLOR #colorLiteral | PIXELSIZE #pixelLiteral | PERCENTAGE #percentageLiteral | (TRUE|FALSE) #boolLiteral | SCALAR #scalarLiteral;
 stylerule: (tagSelector|idSelector|classSelector) OPEN_BRACE body CLOSE_BRACE;
 tagSelector: LOWER_IDENT;

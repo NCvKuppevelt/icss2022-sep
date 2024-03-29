@@ -2,10 +2,7 @@ package nl.han.ica.icss.checker;
 
 import nl.han.ica.icss.ast.*;
 import nl.han.ica.icss.ast.literals.*;
-import nl.han.ica.icss.ast.operations.AddOperation;
-import nl.han.ica.icss.ast.operations.MultiplyOperation;
-import nl.han.ica.icss.ast.operations.NotOperation;
-import nl.han.ica.icss.ast.operations.SubtractOperation;
+import nl.han.ica.icss.ast.operations.*;
 import nl.han.ica.icss.ast.selectors.ClassSelector;
 import nl.han.ica.icss.ast.selectors.IdSelector;
 import nl.han.ica.icss.ast.selectors.TagSelector;
@@ -184,6 +181,10 @@ public class Checker {
                 operation.setError("Only a boolean value can be used with a NOT operation");
             else
                 return rhsType;
+        } else if (operation instanceof AndOperation) {
+            if (lhsType != ExpressionType.BOOL || rhsType != ExpressionType.BOOL)
+                operation.setError("Only a boolean value can be used with an AND operation");
+            else return lhsType;
         }
         return null;
     }

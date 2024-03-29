@@ -5,10 +5,7 @@ import nl.han.ica.icss.ast.literals.BoolLiteral;
 import nl.han.ica.icss.ast.literals.PercentageLiteral;
 import nl.han.ica.icss.ast.literals.PixelLiteral;
 import nl.han.ica.icss.ast.literals.ScalarLiteral;
-import nl.han.ica.icss.ast.operations.AddOperation;
-import nl.han.ica.icss.ast.operations.MultiplyOperation;
-import nl.han.ica.icss.ast.operations.NotOperation;
-import nl.han.ica.icss.ast.operations.SubtractOperation;
+import nl.han.ica.icss.ast.operations.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,7 +106,16 @@ public class Evaluator implements Transform {
             return evaluateSubtractOperation((SubtractOperation) operation);
         else if (operation instanceof NotOperation)
             return evaluateNotOperation((NotOperation) operation);
+        else if (operation instanceof AndOperation)
+            return evaluateAndOperation((AndOperation) operation);
         return null;
+    }
+
+    private BoolLiteral evaluateAndOperation(AndOperation operation) {
+        BoolLiteral lhs = (BoolLiteral) evaluateExpression(operation.lhs);
+        BoolLiteral rhs = (BoolLiteral) evaluateExpression(operation.rhs);
+        assert lhs != null;assert rhs != null;
+        return new BoolLiteral(lhs.value && rhs.value);
     }
 
     private BoolLiteral evaluateNotOperation(NotOperation operation) {
