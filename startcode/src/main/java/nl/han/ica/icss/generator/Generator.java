@@ -12,32 +12,34 @@ import nl.han.ica.icss.ast.selectors.TagSelector;
 public class Generator {
 
     public String generate(AST ast) {
-        return generate((Stylesheet) ast.root);
-        // TODO: Implement generator
+        return generate(ast.root);
     }
 
     private String generate(Stylesheet stylesheet) {
-        StringBuilder styleshetString = new StringBuilder();
+        StringBuilder stylesheetString = new StringBuilder();
         for (ASTNode node : stylesheet.getChildren()) {
             if (node instanceof Stylerule) {
-                styleshetString.append(generate((Stylerule) node));
-                styleshetString.append("\n");
-            } else
-                styleshetString.append("Non-Stylerule child of Stylesheet found, unable to generate\n");
+                stylesheetString
+                        .append(generate((Stylerule) node))
+                        .append("\n");
+            }
+            return null;
         }
-        return styleshetString.toString();
+        return stylesheetString.toString();
     }
 
     private String generate(Stylerule rule) {
         StringBuilder styleruleString = new StringBuilder();
         for (ASTNode node : rule.getChildren()) {
             if (node instanceof Selector) {
-                styleruleString.append(generate((Selector) node)).append(" {\n");
-//                styleruleString.append(" {\n");
+                styleruleString
+                        .append(generate((Selector) node))
+                        .append(" {\n");
             } else if (node instanceof Declaration) {
-                styleruleString.append("\t");
-                styleruleString.append(generate((Declaration) node));
-                styleruleString.append("\n");
+                styleruleString
+                        .append("  ")
+                        .append(generate((Declaration) node))
+                        .append("\n");
             }
         }
         styleruleString.append("}\n");
@@ -51,8 +53,7 @@ public class Generator {
             return ((ClassSelector) selector).cls;
         if (selector instanceof IdSelector)
             return ((IdSelector) selector).id;
-        else
-            return "Selector is instance of unknown class, unable to generate";
+        return null;
     }
 
     private String generate(Declaration declaration) {
@@ -66,8 +67,7 @@ public class Generator {
             return ((PercentageLiteral) expression).value + "%";
         else if (expression instanceof ColorLiteral)
             return ((ColorLiteral) expression).value;
-        else
-            return "Expression not instance of valid Literal, unable to generate";
+        return null;
     }
 
 }
