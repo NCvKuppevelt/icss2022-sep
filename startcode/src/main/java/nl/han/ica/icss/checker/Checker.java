@@ -4,6 +4,7 @@ import nl.han.ica.icss.ast.*;
 import nl.han.ica.icss.ast.literals.*;
 import nl.han.ica.icss.ast.operations.AddOperation;
 import nl.han.ica.icss.ast.operations.MultiplyOperation;
+import nl.han.ica.icss.ast.operations.NotOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
 import nl.han.ica.icss.ast.selectors.ClassSelector;
 import nl.han.ica.icss.ast.selectors.IdSelector;
@@ -20,7 +21,7 @@ public class Checker {
     private LinkedList<HashMap<String, ExpressionType>> variableTypes;
     private final ArrayList<String> colorProperties = new ArrayList<>();
     private final ArrayList<String> sizeProperties = new ArrayList<>();
-    private final ArrayList<ExpressionType> nonOperableExpTypes = new ArrayList<>();
+    private final ArrayList<ExpressionType> nonArithmeticExpTypes = new ArrayList<>();
 
     public Checker() {
         initColorProperties();
@@ -29,8 +30,8 @@ public class Checker {
     }
 
     private void initNonOperableExprTypes() {
-        nonOperableExpTypes.add(ExpressionType.BOOL);
-        nonOperableExpTypes.add(ExpressionType.COLOR);
+        nonArithmeticExpTypes.add(ExpressionType.BOOL);
+        nonArithmeticExpTypes.add(ExpressionType.COLOR);
     }
 
     private void initColorProperties() {
@@ -98,18 +99,23 @@ public class Checker {
     }
 
     private void checkIfClause(IfClause ifClause) {
-        for (ASTNode node : ifClause.getChildren()) {
-            if (node instanceof VariableReference) {
-                if (getTypeOfVariable((VariableReference) node) != ExpressionType.BOOL)
-                    node.setError("If-clause condition must be a boolean");
-            } else if (node instanceof BoolLiteral)
-                check((BoolLiteral) node);
-            else if (node instanceof Declaration)
+        Expression expression = ifClause.getConditionalExpression();
+        ExpressionType type = checkTypeOfExpression(expression);
+        if (type != ExpressionType.BOOL)
+            expression.setError("If-clause condition must be a boolean");
+        checkBody(ifClause.body);
+        if (ifClause.elseClause != null)
+            checkBody(ifClause.elseClause.body);
+    }
+
+    private void checkBody(ArrayList<ASTNode> body) {
+        for (ASTNode node : body) {
+            if (node instanceof Declaration)
                 checkDeclaration((Declaration) node);
             else if (node instanceof IfClause)
                 checkIfClause((IfClause) node);
-            else if (!(node instanceof ElseClause))
-                node.setError("Unknown type as child of IfClause");
+            else
+                node.setError("Unknown type in body");
         }
     }
 
@@ -158,8 +164,9 @@ public class Checker {
         ExpressionType lhsType = checkTypeOfExpression(operation.lhs);
         ExpressionType rhsType = checkTypeOfExpression(operation.rhs);
 
-        if (nonOperableExpTypes.contains(lhsType) || nonOperableExpTypes.contains(rhsType)) {
-            operation.setError("Cannot perform operations on a boolean or color");
+        if ((nonArithmeticExpTypes.contains(lhsType) || nonArithmeticExpTypes.contains(rhsType))
+                && isArithmeticOperation(operation)) {
+            operation.setError("Cannot perform arithmetic operations on a boolean or color");
         } else if (operation instanceof AddOperation || operation instanceof SubtractOperation) {
             if (lhsType != rhsType)
                 operation.setError("Expressions on both sides of an add or subtract operation must be of same type");
@@ -172,8 +179,19 @@ public class Checker {
                 return rhsType;
             else
                 return lhsType;
+        } else if (operation instanceof NotOperation) {
+            if (rhsType != ExpressionType.BOOL)
+                operation.setError("Only a boolean value can be used with a NOT operation");
+            else
+                return rhsType;
         }
         return null;
+    }
+
+    private boolean isArithmeticOperation(Operation operation) {
+        return operation instanceof MultiplyOperation
+                || operation instanceof AddOperation
+                || operation instanceof SubtractOperation;
     }
 
     private ExpressionType getTypeOfVariable(VariableReference variableReference) {

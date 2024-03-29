@@ -7,6 +7,7 @@ import nl.han.ica.icss.ast.literals.PixelLiteral;
 import nl.han.ica.icss.ast.literals.ScalarLiteral;
 import nl.han.ica.icss.ast.operations.AddOperation;
 import nl.han.ica.icss.ast.operations.MultiplyOperation;
+import nl.han.ica.icss.ast.operations.NotOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
 
 import java.util.ArrayList;
@@ -106,7 +107,15 @@ public class Evaluator implements Transform {
             return evaluateAddOperation((AddOperation) operation);
         else if (operation instanceof SubtractOperation)
             return evaluateSubtractOperation((SubtractOperation) operation);
+        else if (operation instanceof NotOperation)
+            return evaluateNotOperation((NotOperation) operation);
         return null;
+    }
+
+    private BoolLiteral evaluateNotOperation(NotOperation operation) {
+        BoolLiteral bool = (BoolLiteral) evaluateExpression(operation.rhs);
+        assert bool != null;
+        return new BoolLiteral(!bool.value);
     }
 
     private Expression evaluateMultiplyOperation(MultiplyOperation operation) {
