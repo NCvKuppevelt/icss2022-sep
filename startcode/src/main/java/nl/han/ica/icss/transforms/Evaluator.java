@@ -88,10 +88,7 @@ public class Evaluator implements Transform {
             return evaluateVariableReference((VariableReference) expression);
         else if (expression instanceof Operation)
             return evaluateOperation((Operation) expression);
-        else {
-            expression.setError("Could not evaluate expression");
-            return null;
-        }
+        return null;
     }
 
     private Literal evaluateVariableReference(VariableReference variableReference) {
@@ -99,7 +96,6 @@ public class Evaluator implements Transform {
             if (map.containsKey(variableReference.name))
                 return map.get(variableReference.name);
         }
-        variableReference.setError("Could not evaluate variable");
         return null;
     }
 
@@ -108,9 +104,8 @@ public class Evaluator implements Transform {
             return evaluateMultiplyOperation((MultiplyOperation) operation);
         else if (operation instanceof AddOperation)
             return evaluateAddOperation((AddOperation) operation);
-        else if (operation instanceof SubtractOperation) {
+        else if (operation instanceof SubtractOperation)
             return evaluateSubtractOperation((SubtractOperation) operation);
-        }
         return null;
     }
 
